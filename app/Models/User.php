@@ -21,7 +21,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'phone'
+        'phone',
+        'address',
     ];
 
     /**
@@ -35,28 +36,71 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-
-    // Role checking methods
-    public function isParent()
+    protected function casts(): array
     {
-        return $this->role === 'parent';
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
+    /**
+     * Get the students for the user.
+     */
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
+
+    /**
+     * Get the notifications for the user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Get the applications reviewed by the user.
+     */
+    public function reviewedApplications()
+    {
+        return $this->hasMany(AdmissionApplication::class, 'reviewed_by');
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
     public function isAdmin()
     {
         return $this->role === 'admin';
     }
 
+    /**
+     * Check if the user is a principal.
+     */
     public function isPrincipal()
     {
         return $this->role === 'principal';
     }
-};
+
+    /**
+     * Check if the user is a parent.
+     */
+    public function isParent()
+    {
+        return $this->role === 'parent';
+    }
+
+    /**
+     * Get the user's unread notifications.
+     */
+    public function unreadNotifications()
+    {
+        return $this->notifications()->where('is_read', false);
+    }
+}
