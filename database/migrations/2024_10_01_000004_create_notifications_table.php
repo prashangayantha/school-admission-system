@@ -1,4 +1,5 @@
 <?php
+// database/migrations/2024_10_01_000004_create_notifications_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,14 +10,19 @@ return new class extends Migration
     public function up()
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->text('message');
-            $table->enum('type', ['info', 'success', 'warning', 'error'])->default('info');
-            $table->boolean('is_read')->default(false);
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
+            
+            // Additional fields for our notification system
+            $table->string('title');
+            $table->text('message');
+            $table->enum('status', ['sent', 'failed', 'pending'])->default('sent');
+            $table->string('channel')->default('database'); // email, sms, database
+            $table->json('metadata')->nullable();
         });
     }
 
